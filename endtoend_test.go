@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -40,6 +39,7 @@ func TestEndToEnd(t *testing.T) {
 			methodNames: []string{"IsExpr", "IsNode"},
 		},
 	} {
+		tc := tc
 		t.Run(tc.title, func(t *testing.T) {
 			b.compileAndRun(t, tc.fileName, tc.typeNames, tc.methodNames)
 		})
@@ -59,7 +59,7 @@ func newMarker(t *testing.T) *marker {
 
 func (s *marker) init(t *testing.T) {
 	t.Helper()
-	dir, err := ioutil.TempDir("", "marker")
+	dir, err := os.MkdirTemp("", "marker")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +84,10 @@ func (s *marker) compileAndRun(t *testing.T, fileName string, typeNames, methodN
 	}
 	markerSrc := filepath.Join(s.dir, fmt.Sprintf("%s_marker.go", typeNames[0]))
 	// run marker
-	if err := run(s.marker, "-type", strings.Join(typeNames, ","), "-method", strings.Join(methodNames, ","), "-output", markerSrc, src); err != nil {
+	if err := run(s.marker,
+		"-type", strings.Join(typeNames, ","),
+		"-method", strings.Join(methodNames, ","),
+		"-output", markerSrc, src); err != nil {
 		t.Fatal(err)
 	}
 	// run testfile with generated file

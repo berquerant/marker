@@ -2,17 +2,12 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-type Golden struct {
-	name, input, output string
-}
 
 const one = `type First struct {}
 `
@@ -22,12 +17,11 @@ type Second struct {}
 `
 
 func TestGolden(t *testing.T) {
-	dir, err := ioutil.TempDir("", "marker")
+	dir, err := os.MkdirTemp("", "marker")
 	if err != nil {
 		t.Error(err)
 	}
 	defer os.RemoveAll(dir)
-
 	for _, tc := range []*struct {
 		title   string
 		input   string
@@ -72,11 +66,12 @@ func (*Second) IsBlue() {}
 `,
 		},
 	} {
+		tc := tc
 		t.Run(tc.title, func(t *testing.T) {
 			input := fmt.Sprintf("package test\n%s", tc.input)
 			file := fmt.Sprintf("%s.go", tc.title)
 			absFile := filepath.Join(dir, file)
-			if err := ioutil.WriteFile(absFile, []byte(input), 0644); err != nil {
+			if err := os.WriteFile(absFile, []byte(input), 0600); err != nil {
 				t.Error(err)
 			}
 			g := Generator{}

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"go/format"
 	"go/types"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -28,7 +27,7 @@ Flags:
 `
 
 func Usage() {
-	fmt.Fprintf(os.Stderr, usage)
+	fmt.Fprintln(os.Stderr, usage)
 	flag.PrintDefaults()
 }
 
@@ -82,7 +81,7 @@ func main() {
 		baseName := fmt.Sprintf("%s_marker.go", types[0])
 		outputName = filepath.Join(dir, strings.ToLower(baseName))
 	}
-	if err := ioutil.WriteFile(outputName, g.format(), 0644); err != nil {
+	if err := os.WriteFile(outputName, g.format(), 0600); err != nil {
 		log.Fatalf("write file %v", err)
 	}
 }
@@ -107,7 +106,7 @@ type Package struct {
 
 func (s *Generator) parsePackage(patterns []string) {
 	pkgs, err := packages.Load(&packages.Config{
-		Mode: packages.NeedTypesInfo | packages.LoadTypes,
+		Mode: packages.NeedTypesInfo | packages.NeedTypes | packages.NeedName,
 	}, patterns...)
 	if err != nil {
 		log.Fatal(err)
