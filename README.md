@@ -16,4 +16,4 @@ package example
 func (*Kern) IsKern() {}
 ```
 
-in Kern_marker.go in the same directory.
+in kern_marker.go in the same directory.
