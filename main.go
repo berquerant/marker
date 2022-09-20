@@ -23,8 +23,7 @@ var (
 const usage = `Usage of marker:
   marker [flags] -type T -method M [directory]
   marker [flags] -type T -method M files...  # Must be a single package
-Flags:
-`
+Flags:`
 
 func Usage() {
 	fmt.Fprintln(os.Stderr, usage)
