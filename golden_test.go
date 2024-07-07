@@ -23,11 +23,12 @@ func TestGolden(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 	for _, tc := range []*struct {
-		title   string
-		input   string
-		output  string
-		types   []string
-		methods []string
+		title         string
+		input         string
+		output        string
+		types         []string
+		methods       []string
+		valueReceiver bool
 	}{
 		{
 			title:   "one_first_1",
@@ -65,6 +66,18 @@ func (*Second) IsRed()  {}
 func (*Second) IsBlue() {}
 `,
 		},
+		{
+			title:   "two_second_2_value_receiver",
+			input:   two,
+			types:   []string{"First", "Second"},
+			methods: []string{"IsRed", "IsBlue"},
+			output: `func (First) IsRed()   {}
+func (First) IsBlue()  {}
+func (Second) IsRed()  {}
+func (Second) IsBlue() {}
+`,
+			valueReceiver: true,
+		},
 	} {
 		tc := tc
 		t.Run(tc.title, func(t *testing.T) {
@@ -74,7 +87,9 @@ func (*Second) IsBlue() {}
 			if err := os.WriteFile(absFile, []byte(input), 0600); err != nil {
 				t.Error(err)
 			}
-			g := Generator{}
+			g := Generator{
+				useValueReceiver: tc.valueReceiver,
+			}
 			g.parsePackage([]string{absFile})
 			g.generateMulti(tc.types, tc.methods)
 			got := string(g.format())

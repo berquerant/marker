@@ -15,9 +15,10 @@ import (
 )
 
 var (
-	typeNames   = flag.String("type", "", "comma-separated list of type names; must be set")
-	methodNames = flag.String("method", "", "comma-separated list of method names; must be set")
-	output      = flag.String("output", "", "output file name; default srcdir/<type>_marker.go")
+	typeNames     = flag.String("type", "", "comma-separated list of type names; must be set")
+	methodNames   = flag.String("method", "", "comma-separated list of method names; must be set")
+	output        = flag.String("output", "", "output file name; default srcdir/<type>_marker.go")
+	valueReceiver = flag.Bool("valueReceiver", false, "use value receiver instead of pointer receiver")
 )
 
 const usage = `Usage of marker:
@@ -86,8 +87,9 @@ func main() {
 }
 
 type Generator struct {
-	buf bytes.Buffer
-	pkg *Package
+	buf              bytes.Buffer
+	pkg              *Package
+	useValueReceiver bool
 }
 
 func (s *Generator) Printf(format string, v ...interface{}) {
@@ -133,14 +135,25 @@ func (s *Generator) addPackage(pkg *packages.Package) {
 	}
 }
 
-const methodTemplate = `func (*%[1]s) %[2]s() {}
+const (
+	methodWithValueReceiverTemplate = `func (%[1]s) %[2]s() {}
 `
+	methodWithPointerReceiverTemplate = `func (*%[1]s) %[2]s() {}
+`
+)
+
+func (s Generator) methodTemplate() string {
+	if s.useValueReceiver {
+		return methodWithValueReceiverTemplate
+	}
+	return methodWithPointerReceiverTemplate
+}
 
 func (s *Generator) generate(typeName, methodName string) {
 	if _, exist := s.pkg.defs[typeName]; !exist {
 		log.Fatalf("%s not found", typeName)
 	}
-	s.Printf(methodTemplate, typeName, methodName)
+	s.Printf(s.methodTemplate(), typeName, methodName)
 }
 
 func (s *Generator) generateMulti(typeNames, methodNames []string) {
