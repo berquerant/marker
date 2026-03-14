@@ -39,7 +39,6 @@ func TestEndToEnd(t *testing.T) {
 			methodNames: []string{"IsExpr", "IsNode"},
 		},
 	} {
-		tc := tc
 		t.Run(tc.title, func(t *testing.T) {
 			b.compileAndRun(t, tc.fileName, tc.typeNames, tc.methodNames)
 		})

@@ -79,7 +79,6 @@ func (Second) IsBlue() {}
 			valueReceiver: true,
 		},
 	} {
-		tc := tc
 		t.Run(tc.title, func(t *testing.T) {
 			input := fmt.Sprintf("package test\n%s", tc.input)
 			file := fmt.Sprintf("%s.go", tc.title)

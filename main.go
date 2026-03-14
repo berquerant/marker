@@ -94,11 +94,11 @@ type Generator struct {
 	useValueReceiver bool
 }
 
-func (s *Generator) Printf(format string, v ...interface{}) {
+func (s *Generator) Printf(format string, v ...any) {
 	fmt.Fprintf(&s.buf, format, v...)
 }
 
-func (s *Generator) Println(v ...interface{}) {
+func (s *Generator) Println(v ...any) {
 	fmt.Fprintln(&s.buf, v...)
 }
 
